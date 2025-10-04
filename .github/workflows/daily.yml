@@ -1,0 +1,25 @@
+name: ai-youtube-daily
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # ← JST 10:00 は UTC 01:00
+  workflow_dispatch: {}     # 手動実行ボタン
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - name: Run collector
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          CHANNEL_IDS: ${{ secrets.CHANNEL_IDS }}
+          # 任意：直近時間や件数を調整したい場合は下記を Secrets でも可
+          # HOURS_WINDOW: "24"
+          # MAX_PER_CHANNEL: "10"
+        run: python yt_news.py
